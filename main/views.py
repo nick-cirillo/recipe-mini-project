@@ -1,21 +1,25 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from .models import Tweet
+from .models import Recipe
 from datetime import datetime
 
 def main_view(request):
-    if not request.user.is_authenticated:
-        return redirect('/splash/')
-    if request.method == 'POST' and request.POST['body'] != "":
-        tweet = Tweet.objects.create(
-            body = request.POST['body'],
-            author = request.user,
-            created_at = datetime.now()
-        )
-        tweet.save()
-    tweets = Tweet.objects.order_by('-created_at')
-    return render(request, 'main.html', {'tweets': tweets})
+    # if not request.user.is_authenticated:
+    #     return redirect('/splash/')
+    if request.method == 'POST' and request.POST['title'] != "" and request.POST['intro'] != "" \
+        and request.POST['body'] != "":
+            recipe = Recipe.objects.create(
+                title = request.POST['title'],
+                image = request.POST['image'],
+                intro = request.POST['intro'],
+                body = request.POST['body'],
+                author = request.user,
+                created_at = datetime.now()
+            )
+            recipe.save()
+    recipes = Recipe.objects.order_by('-created_at')
+    return render(request, 'main.html', {'recipes': recipes})
 
 def splash_view(request):
     return render(request, 'splash.html')
@@ -42,20 +46,23 @@ def signup_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('/splash')
+    return redirect('/')
 
 def delete_view(request):
-    tweet = Tweet.objects.get(id = request.GET['id'])
-    if request.user == tweet.author:
-        tweet.delete()
+    recipe = Recipe.objects.get(id = request.GET['id'])
+    if request.user == recipe.author:
+        recipe.delete()
     return redirect('/')
 
 def like_view(request):
-    tweet = Tweet.objects.get(id = request.GET['id'])
+    recipe = Recipe.objects.get(id = request.GET['id'])
     
-    if len(tweet.likes.filter(username=request.user.username)) == 0:
-        tweet.likes.add(request.user)
+    if not request.user.is_authenticated:
+        return redirect('/splash')
     else:
-        tweet.likes.remove(request.user)
-    tweet.save()
-    return redirect('/')
+        if len(recipe.likes.filter(username=request.user.username)) == 0:
+            recipe.likes.add(request.user)
+        else:
+            recipe.likes.remove(request.user)
+        recipe.save()
+        return redirect('/')
