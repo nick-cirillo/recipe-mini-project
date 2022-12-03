@@ -7,55 +7,161 @@ Spark Recipes
 
 {% block styles %}
 <style>
-#login {
-    display:inline;
+.welcome {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 4px 16px;
 }
+
+#login {
+    display: inline;
+}
+
+#logout {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+button {
+    background-color: #660000;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+#recipe-form {
+    margin: 4px 20px;
+}
+
+input[type=text] {
+  width: 50%;
+  padding: 8px 20px;
+  margin: 8px 0;
+  display: block;
+  border: 1px solid rgb(141, 141, 141);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+    width: 25%;
+    background-color: #660000;
+    color: white;
+    padding: 10px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: none;
+    border-radius: 8px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #3e0101;
+}
+
+#new-recipes {
+    margin: 20px 16px;
+}
+
+.recipe {
+    margin: 10px 24px;
+
+}
+
+.recipe-header {
+    display: block;
+}
+
+.recipe-image {
+    width: 15%;
+    height: 15%;
+}
+
+.recipe-interact {
+    color: black;
+}
+
+.recipe-interact:visited {
+    color: black;
+}
+
+.recipe-interact:hover {
+    color: blue;
+}
+
+.heart-favicon {
+    width: 1%;
+    height: 1%;
+}
+
 </style>
 {% endblock %}
 
 {% block body %}
-
-<h1>Welcome to Spark Recipes</h1>
-{% if not request.user.is_authenticated %}
-<h3>Hello!</h3>
-<a href="/splash"><button>Log In</button></a>
-<p id="login"> to upload recipes and like posts!</p>
-{% else %}
-<h3>Hello, {{ user.username }}!</h3>
-<a href="/logout"><button>Log Out</button></a>
-{% endif %}
-
+<div class="welcome">
+    <h1>Welcome to Spark Recipes!</h1>
+    {% if not request.user.is_authenticated %}
+    <div id="logbanner">
+    <div>
+        <h3>Hello!</h3>
+        <a href="/splash"><button>Log In</button></a>
+        <p id="login"> to upload recipes and like posts!</p>
+    </div>
+    </div>
+    {% else %}
+    <div id="logout">
+        <h3>Hello, {{ user.username }}!</h3>
+        <a href="/logout"><button>Log Out</button></a>
+    </div>
+</div>
 <div>
-    <form method="POST" action="/">
+    <form id="recipe-form" method="POST" action="/">
         {% csrf_token %}
         <h2>Post a Recipe</h2>
-        <input name="title" placeholder="Give your recipe a fun title."/>
-        <input name="image" placeholder="Add a photo to highlight your recipe.">
-        <input name="intro" placeholder="Tell the story of your recipe!"/>
-        <input name="body" placeholder="Explain how to put together all your ingredients."/>
+        <input name="title" type="text" placeholder="Give your recipe a fun title."/>
+        <input name="image" type="text" placeholder="Add a link to a photo to highlight your recipe."/>
+        <input name="ingredients" type="text" placeholder="Add the ingredients here."/>
+        <input name="intro" type="text" placeholder="Tell the story of your recipe!"/>
+        <input name="body" type="text" placeholder="Explain how to put together all your ingredients."/>
         <input type="submit" value="Post Recipe"/>
     </form>
 </div>
 
+<h1 id="new-recipes">Newest Recipes</h1>
+
+{% endif %}
+
+
 {% for recipe in recipes %}
-<div>
-    <b>{{ recipe.author }}</b> | <i>{{ recipe.created_at }}</i>
-    <h3>{{ recipe.title }}</h3>
-    <img src="{{ recipe.image }}">
+<div class="recipe">
+    <div class="recipe-header">
+        <h2>{{ recipe.title }}</h2>
+        <b>By {{ recipe.author }}</b> | {{ recipe.created_at }}
+    </div>
+    <img class="recipe-image" src="{{ recipe.image }}">
     <p>{{ recipe.intro }}</p>
+    <p>{{ recipe.ingredients }}</p>
     <p>{{ recipe.body }}</p>
     {% if user == recipe.author %}
-        <a href="delete?id={{recipe.id}}">delete recipe</a>
+        <a class="recipe-interact" href="delete?id={{recipe.id}}">Delete Recipe</a>
     {% endif %}
     <p>
-        <a href="like?id={{recipe.id}}">
+        <a class="recipe-interact" href="like?id={{recipe.id}}">
             {% if user in recipe.likes.all %}
-                unlike
+                Unlike
             {% else %}
-                like
+                Like
             {% endif %}
-        </a> 
-    ({{ recipe.likes.count }} &hearts;)</p>
+        </a>
+         • {{ recipe.likes.count }}
+        <a class="recipe-interact" href="like?id={{recipe.id}}"><img class="heart-favicon" src="../static/hearts.png"/></a>
+    </p>
 </div>
 {% endfor %}
 

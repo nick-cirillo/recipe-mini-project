@@ -13,6 +13,7 @@ def main_view(request):
                 title = request.POST['title'],
                 image = request.POST['image'],
                 intro = request.POST['intro'],
+                ingredients = request.POST['ingredients'],
                 body = request.POST['body'],
                 author = request.user,
                 created_at = datetime.now()

@@ -6,6 +6,7 @@ class Recipe(models.Model):
     title = models.CharField(max_length=200)
     image = models.URLField(default='')
     intro = models.TextField(default='')
+    ingredients = models.TextField(default='')
     body = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField() 
